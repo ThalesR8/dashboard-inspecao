@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Inspeção</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER COM ALERTAS -->
+        <div class="alert-banner" id="alertBanner">
+            <div class="alert-banner-top">
+                <div class="alert-banner-text">
+                    <p id="alertText">⏳ Carregando dados da planilha...</p>
+                    <div class="last-update" id="lastUpdate">Última atualização: nunca</div>
+                </div>
+                <button class="theme-switch" aria-label="Alternar modo de tema" type="button" id="themeToggle">
+                    <span class="switch-thumb"></span>
+                </button>
+            </div>
+            <div class="debug-info" id="debugInfo" style="display: none; margin-top: 10px; font-size: 12px; color: #666;">
+                <strong>URLs testadas:</strong><br>
+                <a href="https://docs.google.com/spreadsheets/d/2PACX-1vSJh8BM0X952YMGp86L6VcSr_j1510JXZHBQpTFjABKDBjg6bfSum4sMdO7a97T6Nk_BpkAls-rHOnq/export?format=csv&gid=1128658534" target="_blank">URL 1 (Export)</a> | 
+                <a href="https://docs.google.com/spreadsheets/d/2PACX-1vSJh8BM0X952YMGp86L6VcSr_j1510JXZHBQpTFjABKDBjg6bfSum4sMdO7a97T6Nk_BpkAls-rHOnq/gviz/tq?tqx=out:csv&gid=1128658534" target="_blank">URL 2 (API)</a> | 
+                <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSJh8BM0X952YMGp86L6VcSr_j1510JXZHBQpTFjABKDBjg6bfSum4sMdO7a97T6Nk_BpkAls-rHOnq/pub?gid=1128658534&single=true&output=csv" target="_blank">URL 3 (Publicada)</a>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label>CLIENTE</label>
+                <select id="filterCliente">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>LINHA</label>
+                <select id="filterLinha">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>SB</label>
+                <select id="filterSB">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>TIPO INSPEÇÃO</label>
+                <select id="filterTipo">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>TURNO</label>
+                <select id="filterTurno">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>PERÍODO - DE</label>
+                <input type="date" id="filterDataDe">
+            </div>
+            <div class="filter-group">
+                <label>PERÍODO - ATÉ</label>
+                <input type="date" id="filterDataAte">
+            </div>
+            <div class="filter-actions">
+                <button class="btn-atualizar" onclick="atualizarDados()" id="btnAtualizar">
+                    🔄 Atualizar Dados
+                </button>
+                <button class="btn-limpar" onclick="limparFiltros()">Limpar Filtros</button>
+            </div>
+        </div>
+
+        <!-- PROGRESSO BAR -->
+        <div class="progress-section">
+            <h3>Progresso de Inspeções</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">Carregando...</p>
+        </div>
+
+        <!-- CARDS DE INDICADORES -->
+        <div class="cards-grid">
+            <div class="card card-blue">
+                <span class="badge-color blue"></span>
+                <p class="card-label">INSPEÇÕES TOTAIS</p>
+                <p class="card-value" id="cardTotal">0</p>
+            </div>
+            <div class="card card-green">
+                <span class="badge-color green"></span>
+                <p class="card-label">VALIDADAS</p>
+                <p class="card-value" id="cardValidadas">0</p>
+            </div>
+            <div class="card card-yellow">
+                <span class="badge-color yellow"></span>
+                <p class="card-label">NÃO VALIDADAS</p>
+                <p class="card-value" id="cardNaoValidadas">0</p>
+            </div>
+            <div class="card card-orange">
+                <span class="badge-color orange"></span>
+                <p class="card-label">DUPLICADAS</p>
+                <p class="card-value" id="cardDuplicadas">0</p>
+            </div>
+            <div class="card card-red">
+                <span class="badge-color red"></span>
+                <p class="card-label">COM OCORRÊNCIA</p>
+                <p class="card-value" id="cardOcorrencias">0</p>
+            </div>
+            <div class="card card-purple">
+                <span class="badge-color purple"></span>
+                <p class="card-label">KM MÉDIO</p>
+                <p class="card-value" id="cardKmMedio">0</p>
+            </div>
+            <div class="card card-teal">
+                <span class="badge-color teal"></span>
+                <p class="card-label">KM TOTAL INSPECIONADO</p>
+                <p class="card-value" id="cardKmTotal">0,000</p>
+            </div>
+        </div>
+
+        <!-- SEÇÃO DE ANÁLISE AUTOMÁTICA -->
+        <div class="analise-section">
+            <div class="analise-header">
+                <span class="icon">📊</span>
+                <div>
+                    <h3>Análise Estatística Automática</h3>
+                    <p>Processamento de dados em tempo real</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICOS E TABELAS -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h4>Inspeções por Linha</h4>
+                <canvas id="chartHabilidades"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4>Validação de Dados</h4>
+                <canvas id="chartCompatibilidade"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4>Produtividade (km/h) por Tipo</h4>
+                <canvas id="chartDesempenho"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4>Distribuição por Turno</h4>
+                <canvas id="chartErro"></canvas>
+            </div>
+        </div>
+
+        <!-- TABELA DE DADOS -->
+        <div class="table-section">
+            <h3>Resumo de Inspeções por Ultrasom</h3>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Data Início</th>
+                        <th>Linha</th>
+                        <th>Via</th>
+                        <th>Km Inspecionado</th>
+                        <th>Produtividade</th>
+                        <th>Validado</th>
+                        <th>Responsável</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+# Arquivos temporários
+*.tmp
+*.temp
+*.log
+
+# Diretórios de build
+dist/
+build/
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Dados sensíveis (se houver)
+.env
+.env.local
+.env.*.local
